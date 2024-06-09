@@ -1,26 +1,36 @@
 package functions;
 
 public class Input {
-    private String message;
+    private String url;
+    private String from;
+    private String chat;
 
     public Input() {}
 
-    public Input(String message) {
-        this.message = message;
+    public Input(String url, String from, String chat) {
+        this.url = url;
+        this.from = from;
+        this.chat = chat;
     }
 
-    public String getMessage() {
-        return message;
+    public String getUrl() {
+        return url;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public String getFrom() {
+        return from;
+    }
+
+    public String getChat() {
+        return chat;
     }
 
     @Override
     public String toString() {
         return "Input{" +
-                "message='" + message + '\'' +
+                "url='" + url + '\'' +
+                "from='" + from + '\'' +
+                "chat='" + chat + '\'' +
                 '}';
     }
 }
