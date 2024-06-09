@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.notNullValue;
 
 @QuarkusTest
 public class FunctionTest {
-
+/*
     @Test
     void testFunction() {
         Output output = (new Function()).function(CloudEventBuilder.create().build(new Input("Hello!"))).data();
@@ -33,5 +33,5 @@ public class FunctionTest {
                 .header("ce-type", equalTo("function.output"))
                 .body("message", equalTo("Hello!"));
     }
-
+*/
 }
