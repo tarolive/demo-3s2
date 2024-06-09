@@ -25,15 +25,15 @@ public class Input {
         return chat;
     }
 
-    public String setUrl(String url) {
+    public void setUrl(String url) {
         this.url = url;
     }
 
-    public String setFrom(String from) {
+    public void setFrom(String from) {
         this.from = from;
     }
 
-    public String setChat(String chat) {
+    public void setChat(String chat) {
         this.chat = chat;
     }
 
