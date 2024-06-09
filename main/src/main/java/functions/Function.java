@@ -21,7 +21,7 @@ public class Function {
         // Add your business logic here
 
         System.out.println(input);
-        Output output = new Output(input.data().getChat());
+        Output output = new Output(input.data().toString());
         return CloudEventBuilder.create().build(output);
     }
 
