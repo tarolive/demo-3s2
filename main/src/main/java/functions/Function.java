@@ -4,24 +4,33 @@ import io.quarkus.funqy.Funq;
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.funqy.knative.events.CloudEventBuilder;
 
-/**
- * Your Function class
- */
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.SendMessage;
+
 public class Function {
 
-    /**
-     * Use the Quarkus Funq extension for the function. This example
-     * function simply echoes its input data.
-     * @param input a CloudEvent
-     * @return a CloudEvent
-     */
     @Funq
-    public CloudEvent<Output> function(CloudEvent<Input> input) {
+    public CloudEvent<Output> function(CloudEvent<Input> cloudEvent) {
 
-        // Add your business logic here
+        // print cloudEvent
+        System.out.println(cloudEvent);
 
-        System.out.println(input);
-        Output output = new Output("The robot is working! Your name is " + input.data().getFrom().getFirstName() + "!");
+        // get input
+        var input = cloudEvent.data();
+
+        //
+        // logic here!
+        //
+
+        var message = "The robot is working! Your name is " + input.getFrom().getFirstName() + "!";
+
+        // send telegram response message
+        new TelegramBot("").execute(new SendMessage(input.getChat().getId(), message));
+
+        // create output
+        var output = new Output(message);
+
+        // return
         return CloudEventBuilder.create().build(output);
     }
 
