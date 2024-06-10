@@ -21,7 +21,7 @@ public class Function {
         // Add your business logic here
 
         System.out.println(input);
-        Output output = new Output(input.data().toString());
+        Output output = new Output("The robot is working! Your name is " + input.data().getFrom().getFirstName() + "!");
         return CloudEventBuilder.create().build(output);
     }
 
