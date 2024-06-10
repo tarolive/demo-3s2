@@ -6,13 +6,15 @@ public class Input {
     private Integer date;
     private From from;
     private String text;
+    private Chat chat;
 
     public Input() {}
 
-    public Input(Integer date, From from, String text) {
+    public Input(Integer date, From from, String text, Chat chat) {
         this.date = date;
         this.from = from;
         this.text = text;
+        this.chat = chat;
     }
 
     public Integer getDate() {
@@ -27,6 +29,10 @@ public class Input {
         return text;
     }
 
+    public Chat getChat() {
+        return chat;
+    }
+
     public void setDate(Integer date) {
         this.date = date;
     }
@@ -37,6 +43,10 @@ public class Input {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public void setChat(Chat chat) {
+        this.chat = chat;
     }
 
     public static class From {
@@ -90,12 +100,38 @@ public class Input {
         }
     }
 
+    public static class Chat {
+        private Integer id;
+
+        public Chat() {}
+
+        public Chat(Integer id) {
+            this.id = id;
+        }
+
+        public Integer getId() {
+            return id;
+        }
+
+        public void setId(Integer id) {
+            this.id = id;
+        }
+
+        @Override
+        public String toString() {
+            return "Chat{" +
+                    "id='" + id + '\'' +
+                    "}";
+        }
+    }
+
     @Override
     public String toString() {
         return "Input{" +
                 "date='" + date + '\'' +
                 "from='" + from + '\'' +
                 "text='" + text + '\'' +
+                "chat='" + chat + '\'' +
                 '}';
     }
 }
