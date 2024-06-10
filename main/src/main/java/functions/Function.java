@@ -4,10 +4,15 @@ import io.quarkus.funqy.Funq;
 import io.quarkus.funqy.knative.events.CloudEvent;
 import io.quarkus.funqy.knative.events.CloudEventBuilder;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
 
 public class Function {
+
+    @ConfigProperty(name = "telegram.token")
+    String telegramToken;
 
     @Funq
     public CloudEvent<Output> function(CloudEvent<Input> cloudEvent) {
