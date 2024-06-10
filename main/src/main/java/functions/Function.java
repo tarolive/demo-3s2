@@ -30,7 +30,7 @@ public class Function {
         var message = "The robot is working! Your name is " + input.getFrom().getFirstName() + "!";
 
         // send telegram response message
-        new TelegramBot("").execute(new SendMessage(input.getChat().getId(), message));
+        new TelegramBot(telegramToken).execute(new SendMessage(input.getChat().getId(), message));
 
         // create output
         var output = new Output(message);
