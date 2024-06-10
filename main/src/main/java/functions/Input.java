@@ -1,19 +1,21 @@
 package functions;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Input {
-    private Double date;
+    private Integer date;
     private From from;
     private String text;
 
     public Input() {}
 
-    public Input(Double date, From from, String text) {
+    public Input(Integer date, From from, String text) {
         this.date = date;
         this.from = from;
         this.text = text;
     }
 
-    public Double getDate() {
+    public Integer getDate() {
         return date;
     }
 
@@ -25,7 +27,7 @@ public class Input {
         return text;
     }
 
-    public void setDate(Double date) {
+    public void setDate(Integer date) {
         this.date = date;
     }
 
@@ -38,19 +40,23 @@ public class Input {
     }
 
     public static class From {
-        private Double id;
+        private Integer id;
+    
+        @JsonProperty("first_name")
         private String firstName;
+    
+        @JsonProperty("last_name")
         private String lastName;
 
         public From() {}
 
-        public From(Double id, String firstName, String lastName) {
+        public From(Integer id, String firstName, String lastName) {
             this.id = id;
             this.firstName = firstName;
             this.lastName = lastName;
         }
 
-        public Double getId() {
+        public Integer getId() {
             return id;
         }
 
@@ -62,7 +68,7 @@ public class Input {
             return lastName;
         }
 
-        public void setId(Double id) {
+        public void setId(Integer id) {
             this.id = id;
         }
 
