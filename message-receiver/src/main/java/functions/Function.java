@@ -11,23 +11,31 @@ import com.pengrad.telegrambot.request.SendMessage;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
-import org.apache.http.Header;
 import org.apache.http.HttpHost;
-import org.apache.http.message.BasicHeader;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 
 public class Function {
 
     @ConfigProperty(name = "telegram.token")
     String telegramToken;
 
-    @ConfigProperty(name = "elasticsearch.url")
-    String elasticsearchURL;
+    @ConfigProperty(name = "elasticsearch.host")
+    String elasticsearchHost;
 
-    @ConfigProperty(name = "elasticsearch.api-key")
-    String elasticsearchAPIKey;
+    @ConfigProperty(name = "elasticsearch.port")
+    Integer elasticsearchPort;
+
+    @ConfigProperty(name = "elasticsearch.username")
+    String elasticsearchUsername;
+
+    @ConfigProperty(name = "elasticsearch.password")
+    String elasticsearchPassword;
 
     @Funq
     public CloudEvent<Output> function(CloudEvent<Input> cloudEvent) {
@@ -64,13 +72,24 @@ public class Function {
     }
 
     private void saveOutput(Output output) {
+        try {
+            var credentialsProvider = new BasicCredentialsProvider();
+            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(elasticsearchUsername, elasticsearchPassword));
 
-        var restClient = RestClient
-        .builder(HttpHost.create(elasticsearchURL))
-        .setDefaultHeaders(new Header[]{ new BasicHeader("Authorization", "ApiKey " + elasticsearchAPIKey) })
-        .build();
+            var httpClientConfigCallback = new HttpClientConfigCallback(){
+                @Override
+                public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {
+                    return httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+                }
+            };
 
-        var transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-        var elasticsearchClient = new ElasticsearchClient(transport);
+            var httpHost = new HttpHost(elasticsearchHost, elasticsearchPort);
+            var restClient = RestClient.builder(httpHost).setHttpClientConfigCallback(httpClientConfigCallback).build();
+            var transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+            var elasticsearchClient = new ElasticsearchClient(transport);
+            elasticsearchClient.index(i -> i.index("messages").document(output));
+        } catch(Exception e) {
+            System.out.println("Error on saveOutput: " + e.getMessage());
+        }
     }
 }
