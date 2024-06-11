@@ -20,14 +20,20 @@ public class Function {
         // print cloudEvent
         System.out.println(cloudEvent);
 
-        // get input
+        // input
         var input = cloudEvent.data();
+        var from = input.getFrom();
+        var firstName = from.getFirstName();
+        var text = input.getText();
 
-        //
-        // logic here!
-        //
+        // create message
+        var message = "";
 
-        var message = "The robot is working! Your name is " + input.getFrom().getFirstName() + "!";
+        if (text == null || text == "" || text.startsWith("/start")) {
+            message = "Olá " + firstName + ", eu sou o assistente 3s2! Como posso te ajudar?";
+        } else {
+            message = "Vou verificar...";
+        }
 
         // send telegram response message
         new TelegramBot(telegramToken).execute(new SendMessage(input.getChat().getId(), message));
@@ -38,5 +44,4 @@ public class Function {
         // return
         return CloudEventBuilder.create().build(output);
     }
-
 }
