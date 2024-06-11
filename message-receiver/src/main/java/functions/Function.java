@@ -38,7 +38,9 @@ public class Function {
         // input
         var input = cloudEvent.data();
         var from = input.getFrom();
+        var date = input.getDate();
         var firstName = from.getFirstName();
+        var lastName = from.getLastName();
         var text = input.getText();
 
         // create message
@@ -54,7 +56,8 @@ public class Function {
         new TelegramBot(telegramToken).execute(new SendMessage(input.getChat().getId(), message));
 
         // create output
-        var output = new Output(message);
+        var output = new Output(date, firstName, lastName, text, message);
+        saveOutput(output);
 
         // return
         return CloudEventBuilder.create().build(output);
