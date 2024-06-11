@@ -1,9 +1,8 @@
 specVersion: 0.36.0
 name: message-receiver
 runtime: quarkus
-registry: image-registry.openshift-image-registry.svc:5000/my-3s2
-image: image-registry.openshift-image-registry.svc:5000/my-3s2/message-receiver:latest
-created: 2024-06-09T20:36:39.138745091Z
+registry: image-registry.openshift-image-registry.svc:5000/demo-3s2
+image: image-registry.openshift-image-registry.svc:5000/demo-3s2/message-receiver:latest
 invoke: cloudevent
 build:
   builder: s2i
