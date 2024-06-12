@@ -31,6 +31,9 @@ public class Function {
     @ConfigProperty(name = "elasticsearch.port")
     Integer elasticsearchPort;
 
+    @ConfigProperty(name = "elasticsearch.protocol")
+    String elasticsearchProtocol;
+
     @ConfigProperty(name = "elasticsearch.username")
     String elasticsearchUsername;
 
@@ -52,44 +55,71 @@ public class Function {
         var text = input.getText();
 
         // create message
-        var message = "";
-
-        if (text == null || text == "" || text.startsWith("/start")) {
-            message = "Olá " + firstName + ", eu sou o assistente 3s2! Como posso te ajudar?";
-        } else {
-            message = "Vou verificar...";
-        }
+        var message = handleText(firstName, lastName, text);
 
         // send telegram response message
         new TelegramBot(telegramToken).execute(new SendMessage(input.getChat().getId(), message));
 
         // create output
         var output = new Output(date, firstName, lastName, text, message);
-        saveOutput(output);
+        saveOutput(output, "messages");
 
         // return
         return CloudEventBuilder.create().build(output);
     }
 
-    private void saveOutput(Output output) {
+    private String handleText(String firstName, String lastName, String text) {
+
+        if (text == null || text == "" || text.startsWith("/start")) {
+            return "Olá " + firstName + ", eu sou o assistente 3s2! Como posso te ajudar?";
+        }
+
+        if (text == "/history") {
+            return getHistory();
+        }
+
+        if (text == "/itsm") {
+            var history = getHistory();
+            var ticket = openTicket(history);
+            return "Ticket aberto: " + ticket;
+        }
+
+        return "Não entendi sua pergunta, poderia repetir?";
+    }
+
+    private String getHistory() {
+        return "Histórico: ";
+    }
+
+    private String openTicket(String history) {
+        return "123";
+    }
+
+    private void saveOutput(Output output, String index) {
         try {
-            var credentialsProvider = new BasicCredentialsProvider();
-            credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(elasticsearchUsername, elasticsearchPassword));
-
-            var httpClientConfigCallback = new HttpClientConfigCallback(){
-                @Override
-                public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {
-                    return httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-                }
-            };
-
-            var httpHost = new HttpHost(elasticsearchHost, elasticsearchPort);
-            var restClient = RestClient.builder(httpHost).setHttpClientConfigCallback(httpClientConfigCallback).build();
-            var transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
-            var elasticsearchClient = new ElasticsearchClient(transport);
-            elasticsearchClient.index(i -> i.index("messages").document(output));
+            var elasticsearchClient = createElasticsearchClient();
+            elasticsearchClient.index(i -> i.index(index).document(output));
         } catch(Exception e) {
             System.out.println("Error on saveOutput: " + e.getMessage());
         }
+    }
+
+    private ElasticsearchClient createElasticsearchClient() {
+        var credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, new UsernamePasswordCredentials(elasticsearchUsername, elasticsearchPassword));
+
+        var httpClientConfigCallback = new HttpClientConfigCallback(){
+            @Override
+            public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {
+                return httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+            }
+        };
+
+        var httpHost = new HttpHost(elasticsearchHost, elasticsearchPort, elasticsearchProtocol);
+        var restClient = RestClient.builder(httpHost).setHttpClientConfigCallback(httpClientConfigCallback).build();
+        var transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
+        var elasticsearchClient = new ElasticsearchClient(transport);
+
+        return elasticsearchClient;
     }
 }
