@@ -105,6 +105,7 @@ public class Function {
         var httpClientConfigCallback = new HttpClientConfigCallback(){
             @Override
             public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {
+                httpAsyncClientBuilder.disableAuthCaching();
                 return httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
         };
