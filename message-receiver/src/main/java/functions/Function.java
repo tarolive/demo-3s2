@@ -28,12 +28,6 @@ public class Function {
     @ConfigProperty(name = "elasticsearch.host")
     String elasticsearchHost;
 
-    @ConfigProperty(name = "elasticsearch.port")
-    Integer elasticsearchPort;
-
-    @ConfigProperty(name = "elasticsearch.protocol")
-    String elasticsearchProtocol;
-
     @ConfigProperty(name = "elasticsearch.username")
     String elasticsearchUsername;
 
@@ -74,11 +68,11 @@ public class Function {
             return "Olá " + firstName + ", eu sou o assistente 3s2! Como posso te ajudar?";
         }
 
-        if (text == "/history") {
+        if (text.startsWith("/history")) {
             return getHistory();
         }
 
-        if (text == "/itsm") {
+        if (text.startsWith("/itsm")) {
             var history = getHistory();
             var ticket = openTicket(history);
             return "Ticket aberto: " + ticket;
@@ -115,7 +109,7 @@ public class Function {
             }
         };
 
-        var httpHost = new HttpHost(elasticsearchHost, elasticsearchPort, elasticsearchProtocol);
+        var httpHost = HttpHost.create(elasticsearchHost);
         var restClient = RestClient.builder(httpHost).setHttpClientConfigCallback(httpClientConfigCallback).build();
         var transport = new RestClientTransport(restClient, new JacksonJsonpMapper());
         var elasticsearchClient = new ElasticsearchClient(transport);
