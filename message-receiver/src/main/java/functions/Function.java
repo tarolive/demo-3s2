@@ -95,6 +95,7 @@ public class Function {
             elasticsearchClient.index(i -> i.index(index).document(output));
         } catch(Exception e) {
             System.out.println("Error on saveOutput: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
