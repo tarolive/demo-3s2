@@ -17,4 +17,9 @@ build:
   - name: S2I_SOURCE_DEPLOYMENTS_FILTER
     value: lib quarkus-run.jar app quarkus
   - name: QUARKUS_TLS_TRUST_ALL
-    value: "true"
+    value: true
+envs:
+  - name: QUARKUS_TLS_TRUST_ALL
+    value: true
+deploy:
+  remote: true
