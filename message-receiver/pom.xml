@@ -101,6 +101,9 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <jvmArgs>-Dcom.sun.net.ssl.checkRevocation=false</jvmArgs>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
