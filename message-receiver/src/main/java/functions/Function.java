@@ -20,6 +20,8 @@ import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 
+import nl.altindag.ssl.SSLFactory;
+
 public class Function {
 
     @ConfigProperty(name = "telegram.token")
@@ -95,7 +97,6 @@ public class Function {
             elasticsearchClient.index(i -> i.index(index).document(output));
         } catch(Exception e) {
             System.out.println("Error on saveOutput: " + e.getMessage());
-            e.printStackTrace();
         }
     }
 
@@ -106,8 +107,14 @@ public class Function {
         var httpClientConfigCallback = new HttpClientConfigCallback(){
             @Override
             public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {
+                SSLFactory sslFactory = SSLFactory.builder()
+                    .withUnsafeTrustMaterial()
+                    .withUnsafeHostnameVerifier()
+                    .build();
+
                 return httpAsyncClientBuilder
                     .setSSLHostnameVerifier((host, sslSession) -> true)
+                    .setSSLContext(sslFactory.getSslContext())
                     .setDefaultCredentialsProvider(credentialsProvider);
             }
         };
