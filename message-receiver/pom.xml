@@ -15,7 +15,6 @@
     <quarkus.platform.version>3.2.10.Final-redhat-00002</quarkus.platform.version>
     <skipITs>true</skipITs>
     <surefire-plugin.version>3.0.0-M7</surefire-plugin.version>
-    <jvm.args>-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true</jvm.args>
   </properties>
   <dependencyManagement>
     <dependencies>
