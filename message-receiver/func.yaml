@@ -16,3 +16,7 @@ build:
     value: target/quarkus-app
   - name: S2I_SOURCE_DEPLOYMENTS_FILTER
     value: lib quarkus-run.jar app quarkus
+  - name: maven.wagon.http.ssl.insecure
+    value: "true"
+  - name: maven.wagon.http.ssl.allowall
+    value: "true"
