@@ -102,7 +102,7 @@
           </execution>
         </executions>
         <configuration>
-          <jvmArgs>-Dcom.sun.net.ssl.checkRevocation=false</jvmArgs>
+          <jvmArgs>-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true</jvmArgs>
         </configuration>
       </plugin>
       <plugin>
