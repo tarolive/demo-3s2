@@ -9,6 +9,9 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
 
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
@@ -21,6 +24,8 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 
 import nl.altindag.ssl.SSLFactory;
+
+import java.util.List;
 
 public class Function {
 
@@ -71,11 +76,11 @@ public class Function {
         }
 
         if (text.startsWith("/history")) {
-            return getHistory();
+            return getHistory(firstName, lastName);
         }
 
         if (text.startsWith("/itsm")) {
-            var history = getHistory();
+            var history = getHistory(firstName, lastName);
             var ticket = openTicket(history);
             return "Ticket aberto: " + ticket;
         }
@@ -83,8 +88,43 @@ public class Function {
         return "Não entendi sua pergunta, poderia repetir?";
     }
 
-    private String getHistory() {
-        return "Histórico: ";
+    private String getHistory(String firstName, String lastName) {
+        try {
+            var es = createElasticsearchClient();
+            var history = "Seu histórico: \n";
+
+            var byFirstName = MatchQuery.of(m -> m
+                .field("firstName")
+                .query(firstName)
+            )._toQuery();;
+
+            var byLastName = MatchQuery.of(m -> m
+                .field("lastName")
+                .query(lastName)
+            )._toQuery();;
+
+            SearchResponse<Output> response = es.search(s -> s
+                .index("messages")
+                .query(q -> q
+                    .bool(b -> b
+                        .must(byFirstName)
+                        .must(byLastName)
+                    )
+                ),
+                Output.class
+            );
+
+            List<Hit<Output>> hits = response.hits().hits();
+            for(Hit<Output> hit : hits) {
+                Output out = hit.source();
+                history += "\nPergunta: " + out.getText() + "\nResposta: " + out.getMessage();
+            }
+
+            return history;
+        } catch(Exception e) {
+            System.out.println("Error on getHistory: " + e.getMessage());
+            return "Ocorreu um erro ao buscar histórico :(";
+        }
     }
 
     private String openTicket(String history) {
