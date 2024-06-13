@@ -63,7 +63,9 @@ public class Function {
 
         // create output
         var output = new Output(date, firstName, lastName, text, message);
-        saveOutput(output, "messages");
+        var index = "messages";
+        if (text != null && text.startsWith("/itsm")) index = "tickets";
+        saveOutput(output, index);
 
         // return
         return CloudEventBuilder.create().build(output);
@@ -81,8 +83,8 @@ public class Function {
 
         if (text.startsWith("/itsm")) {
             var history = getHistory(firstName, lastName);
-            var ticket = openTicket(history);
-            return "Ticket aberto: " + ticket;
+            history = history.replaceAll("Seu histórico de mensagens:", "");
+            return "Ticket aberto com o histórico de mensagens: " + history;
         }
 
         return "Não entendi sua pergunta, poderia repetir?";
@@ -91,7 +93,7 @@ public class Function {
     private String getHistory(String firstName, String lastName) {
         try {
             var es = createElasticsearchClient();
-            var history = "Seu histórico: \n";
+            var history = "Seu histórico de mensagens:";
 
             var byFirstName = MatchQuery.of(m -> m
                 .field("firstName")
@@ -125,10 +127,6 @@ public class Function {
             System.out.println("Error on getHistory: " + e.getMessage());
             return "Ocorreu um erro ao buscar histórico :(";
         }
-    }
-
-    private String openTicket(String history) {
-        return "123";
     }
 
     private void saveOutput(Output output, String index) {
