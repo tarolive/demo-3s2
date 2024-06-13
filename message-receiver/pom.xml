@@ -102,6 +102,10 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <jvmArgs>-Dmaven.wagon.http.ssl.insecure=true</jvmArgs>
+          <jvmArgs>-Dmaven.wagon.http.ssl.allowall=true</jvmArgs>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
