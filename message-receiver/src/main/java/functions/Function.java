@@ -105,7 +105,7 @@ public class Function {
         var httpClientConfigCallback = new HttpClientConfigCallback(){
             @Override
             public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {
-                httpAsyncClientBuilder.disableAuthCaching();
+                httpAsyncClientBuilder.setSSLHostnameVerifier((host, sslSession) -> true));
                 return httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
         };
