@@ -105,7 +105,7 @@ public class Function {
         var httpClientConfigCallback = new HttpClientConfigCallback(){
             @Override
             public HttpAsyncClientBuilder customizeHttpClient(HttpAsyncClientBuilder httpAsyncClientBuilder) {
-                httpAsyncClientBuilder.setSSLHostnameVerifier((host, sslSession) -> true));
+                httpAsyncClientBuilder.setSSLHostnameVerifier((host, sslSession) -> true);
                 return httpAsyncClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
             }
         };
