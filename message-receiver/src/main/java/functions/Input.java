@@ -170,6 +170,7 @@ public class Input {
                 "from='" + from + '\'' +
                 "text='" + text + '\'' +
                 "chat='" + chat + '\'' +
+                "photo='" + photo + '\'' +
                 '}';
     }
 }
