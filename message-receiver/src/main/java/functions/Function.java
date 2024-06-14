@@ -94,7 +94,6 @@ public class Function {
         if (text != null && !text.startsWith("/history")) saveOutput(output, index);
 
         if (photo != null && photo.size() > 0) {
-            new TelegramBot(telegramToken).execute(new SendMessage(input.getChat().getId(), "Segue análise da sua image..."));
             handlePhoto(chatId, photo);
         }
 
@@ -164,11 +163,13 @@ public class Function {
                 .endpoint("https://minio-api-minio.apps.cluster-lsc68.dynamic.redhatworkshops.io")
                 .credentials("minio", "minio123")
                 .build();
-            minioClient.uploadObject(UploadObjectArgs.builder()
-                .bucket("yoloimages")
-                .object("/upload/" + filename)
-                .filename(filename)
-                .build());
+            try {
+                minioClient.uploadObject(UploadObjectArgs.builder()
+                    .bucket("yoloimages")
+                    .object("/upload/" + filename)
+                    .filename(filename)
+                    .build());
+            } catch(Exception e) {}
             endpoint = "https://python-python-yolo.apps.cluster-lsc68.dynamic.redhatworkshops.io/yolo_infer";
             url = new URL(endpoint);
             connection = (HttpsURLConnection) url.openConnection();
@@ -199,7 +200,8 @@ public class Function {
                 .filename(filename)
                 .build());
 
-             new TelegramBot(telegramToken).execute(new SendPhoto(String.valueOf(chatId), new File(filename)));
+            new TelegramBot(telegramToken).execute(new SendMessage(chatId, "Segue análise da sua image..."));
+            new TelegramBot(telegramToken).execute(new SendPhoto(chatId, new File(filename)));
 
         } catch (Exception e) {
             System.out.println("Error on handlePhoto: " + e.getMessage());
