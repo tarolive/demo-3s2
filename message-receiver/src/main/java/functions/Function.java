@@ -113,10 +113,12 @@ public class Function {
                     }
                 });
                 connection.setDoOutput(true);
-                try (OutputStream os = connection.getOutputStream()) {
+                try (var os = connection.getOutputStream()) {
                     var input = text.getBytes("utf-8");
                     os.write(input, 0, input.length);           
                 }
+                var responseCode = connection.getResponseCode();
+                System.out.println("Response code from Gemini: " + responseCode);
                 var response = new StringBuilder();
                 try (var in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                     var line = "";
