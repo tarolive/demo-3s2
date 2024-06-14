@@ -26,7 +26,10 @@ import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 import nl.altindag.ssl.SSLFactory;
 import org.json.JSONObject;
 
+import java.io.FileOutputStream;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -106,7 +109,46 @@ public class Function {
     }
 
     private void handlePhoto(List<Input.Photo> photo) {
-        System.out.println("Analisando image...");
+        try {
+                var fileId = photo.get(0).getFileId();
+                var endpoint = "https://api.telegram.org/bot" + telegramToken + "/getFile?file_id=" + fileId;
+                var url = new URL(endpoint);
+                var connection = (HttpsURLConnection) url.openConnection();
+                connection.setRequestMethod("GET");
+                connection.setHostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        return true;
+                    }
+                });
+                connection.setDoOutput(true);
+                var rawResponse = new StringBuilder();
+                try (var in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    var line = "";
+                    while((line = in.readLine()) != null) {
+                        rawResponse.append(line);
+                    }
+                }
+                connection.disconnect();
+                var response = new JSONObject(rawResponse.toString());
+                var filePath = String.valueOf(response.get("file_path"));
+                var fileUrl = new URL("https://api.telegram.org/file/bot" + telegramToken + "/" + filePath);
+                var in = new BufferedInputStream(fileUrl.openStream());
+                var out = new ByteArrayOutputStream();
+                var buf = new byte[1024];
+                var n = 0;
+                while (-1!=(n=in.read(buf))) {
+                    out.write(buf, 0, n);
+                }
+                out.close();
+                in.close();
+                var r = out.toByteArray();
+                var fos = new FileOutputStream(fileId + ".jpg");
+                fos.write(r);
+                fos.close();
+            } catch (Exception e) {
+                System.out.println("Error on handlePhoto: " + e.getMessage());
+            }
     }
 
     private String callGemini(String firstName, String lastName, String text) {
