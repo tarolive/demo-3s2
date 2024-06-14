@@ -150,7 +150,7 @@ public class Function {
             out.close();
             in.close();
             var r = out.toByteArray();
-            var filename = String.valueOf(response.get("file_unique_id")) + ".jpg";
+            var filename = String.valueOf(response.getJSONObject("result").get("file_unique_id")) + ".jpg";
             var fos = new FileOutputStream(filename);
             fos.write(r);
             fos.close();
