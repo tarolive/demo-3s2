@@ -24,6 +24,7 @@ import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 
 import nl.altindag.ssl.SSLFactory;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -117,15 +118,16 @@ public class Function {
                     var input = ("{\"text\": \"" + text + "\"}").getBytes("utf-8");
                     os.write(input, 0, input.length);           
                 }
-                var response = new StringBuilder();
+                var rawResponse = new StringBuilder();
                 try (var in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
                     var line = "";
                     while((line = in.readLine()) != null) {
-                        response.append(line);
+                        rawResponse.append(line);
                     }
                 }
+                var response = new JSONObject(rawResponse.toString());
                 connection.disconnect();
-                return response.toString();
+                return String.valueOf(response.get("gemini_response"));
             } catch(Exception e) {
                 System.out.println("Error on callGemini: " + e.getMessage());
                 return "Ocorreu um erro ao chamar API do Gemini :(";
