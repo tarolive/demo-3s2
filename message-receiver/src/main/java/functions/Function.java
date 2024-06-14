@@ -78,7 +78,7 @@ public class Function {
         if (text != null && text.startsWith("/itsm")) index = "tickets";
         if (text != null && !text.startsWith("/history")) saveOutput(output, index);
 
-        if (photo != null && photo.lenght() > 0) {
+        if (photo != null && photo.size() > 0) {
             handlePhoto(photo);
         }
 
@@ -105,7 +105,7 @@ public class Function {
         return callGemini(firstName, lastName, text);
     }
 
-    private void handlePhoto(List<Photo> photo) {
+    private void handlePhoto(List<Input.Photo> photo) {
         System.out.println("Analisando image...");
     }
 
