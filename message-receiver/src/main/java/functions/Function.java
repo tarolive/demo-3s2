@@ -8,6 +8,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.SendMessage;
+import com.pengrad.telegrambot.request.SendPhoto;
 
 import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
@@ -26,6 +27,8 @@ import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 import nl.altindag.ssl.SSLFactory;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -82,7 +85,7 @@ public class Function {
         var message = handleText(firstName, lastName, text);
 
         // send telegram response message
-        new TelegramBot(telegramToken).execute(new SendMessage(input.getChat().getId(), message));
+        if (photo == null || photo.size() == 0) new TelegramBot(telegramToken).execute(new SendMessage(input.getChat().getId(), message));
 
         // create output
         var output = new Output(date, firstName, lastName, text, message);
@@ -91,6 +94,7 @@ public class Function {
         if (text != null && !text.startsWith("/history")) saveOutput(output, index);
 
         if (photo != null && photo.size() > 0) {
+            new TelegramBot(telegramToken).execute(new SendMessage(input.getChat().getId(), "Segue análise da sua image..."));
             handlePhoto(chatId, photo);
         }
 
@@ -194,6 +198,9 @@ public class Function {
                 .object("/inference/" + filename)
                 .filename(filename)
                 .build());
+
+             new TelegramBot(telegramToken).execute(new SendPhoto(String.valueOf(chatId), new File(filename)));
+
         } catch (Exception e) {
             System.out.println("Error on handlePhoto: " + e.getMessage());
         }
