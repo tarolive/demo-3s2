@@ -163,13 +163,12 @@ public class Function {
                 .endpoint("https://minio-api-minio.apps.cluster-lsc68.dynamic.redhatworkshops.io")
                 .credentials("minio", "minio123")
                 .build();
-            try {
-                minioClient.uploadObject(UploadObjectArgs.builder()
-                    .bucket("yoloimages")
-                    .object("/upload/" + filename)
-                    .filename(filename)
-                    .build());
-            } catch(Exception e) {}
+            minioClient.uploadObject(UploadObjectArgs.builder()
+                .bucket("yoloimages")
+                .object("/upload/" + filename)
+                .filename(filename)
+                .build());
+            new File(filename).delete();
             endpoint = "https://python-python-yolo.apps.cluster-lsc68.dynamic.redhatworkshops.io/yolo_infer";
             url = new URL(endpoint);
             connection = (HttpsURLConnection) url.openConnection();
