@@ -44,6 +44,7 @@ import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
+import io.minio.DownloadObjectArgs;
 import io.minio.errors.MinioException;
 
 public class Function {
@@ -136,9 +137,8 @@ public class Function {
                 }
             }
             connection.disconnect();
-            System.out.println(rawResponse.toString());
             var response = new JSONObject(rawResponse.toString());
-            var filePath = String.valueOf(response.get("file_path"));
+            var filePath = String.valueOf(response.getJSONObject("result").get("file_path"));
             var fileUrl = new URL("https://api.telegram.org/file/bot" + telegramToken + "/" + filePath);
             var in = new BufferedInputStream(fileUrl.openStream());
             var out = new ByteArrayOutputStream();
@@ -161,6 +161,35 @@ public class Function {
             minioClient.uploadObject(UploadObjectArgs.builder()
                 .bucket("yoloimages")
                 .object("/upload/" + filename)
+                .filename(filename)
+                .build());
+            endpoint = "https://python-python-yolo.apps.cluster-lsc68.dynamic.redhatworkshops.io";
+            url = new URL(endpoint);
+            connection = (HttpsURLConnection) url.openConnection();
+            connection.setRequestMethod("POST");
+            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
+            connection.setDoOutput(true);
+            try (var o = connection.getOutputStream()) {
+                var input = ("{\"s3_image_name\": \"" + filename + "\"}").getBytes("utf-8");
+                o.write(input, 0, input.length);           
+            }
+             rawResponse = new StringBuilder();
+            try (var i = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                var line = "";
+                while((line = i.readLine()) != null) {
+                    rawResponse.append(line);
+                }
+            }
+            connection.disconnect();
+            minioClient.downloadObject(DownloadObjectArgs.builder()
+                .bucket("yoloimages")
+                .object("/inference/" + filename)
                 .filename(filename)
                 .build());
         } catch (Exception e) {
