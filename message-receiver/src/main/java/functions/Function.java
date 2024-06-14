@@ -165,7 +165,7 @@ public class Function {
                 .object("/upload/" + filename)
                 .filename(filename)
                 .build());
-            endpoint = "https://python-python-yolo.apps.cluster-lsc68.dynamic.redhatworkshops.io";
+            endpoint = "https://python-python-yolo.apps.cluster-lsc68.dynamic.redhatworkshops.io/yolo_infer";
             url = new URL(endpoint);
             connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
