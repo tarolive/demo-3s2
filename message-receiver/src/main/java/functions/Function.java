@@ -40,6 +40,12 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
 
+import io.minio.BucketExistsArgs;
+import io.minio.MakeBucketArgs;
+import io.minio.MinioClient;
+import io.minio.UploadObjectArgs;
+import io.minio.errors.MinioException;
+
 public class Function {
 
     @ConfigProperty(name = "telegram.token")
@@ -110,45 +116,56 @@ public class Function {
 
     private void handlePhoto(List<Input.Photo> photo) {
         try {
-                var fileId = photo.get(0).getFileId();
-                var endpoint = "https://api.telegram.org/bot" + telegramToken + "/getFile?file_id=" + fileId;
-                var url = new URL(endpoint);
-                var connection = (HttpsURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setHostnameVerifier(new HostnameVerifier() {
-                    @Override
-                    public boolean verify(String hostname, SSLSession session) {
-                        return true;
-                    }
-                });
-                connection.setDoOutput(true);
-                var rawResponse = new StringBuilder();
-                try (var in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-                    var line = "";
-                    while((line = in.readLine()) != null) {
-                        rawResponse.append(line);
-                    }
+            var fileId = photo.get(0).getFileId();
+            var endpoint = "https://api.telegram.org/bot" + telegramToken + "/getFile?file_id=" + fileId;
+            var url = new URL(endpoint);
+            var connection = (HttpsURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
                 }
-                connection.disconnect();
-                var response = new JSONObject(rawResponse.toString());
-                var filePath = String.valueOf(response.get("file_path"));
-                var fileUrl = new URL("https://api.telegram.org/file/bot" + telegramToken + "/" + filePath);
-                var in = new BufferedInputStream(fileUrl.openStream());
-                var out = new ByteArrayOutputStream();
-                var buf = new byte[1024];
-                var n = 0;
-                while (-1!=(n=in.read(buf))) {
-                    out.write(buf, 0, n);
+            });
+            connection.setDoOutput(true);
+            var rawResponse = new StringBuilder();
+            try (var in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                var line = "";
+                while((line = in.readLine()) != null) {
+                    rawResponse.append(line);
                 }
-                out.close();
-                in.close();
-                var r = out.toByteArray();
-                var fos = new FileOutputStream(fileId + ".jpg");
-                fos.write(r);
-                fos.close();
-            } catch (Exception e) {
-                System.out.println("Error on handlePhoto: " + e.getMessage());
             }
+            connection.disconnect();
+            System.out.println(rawResponse.toString());
+            var response = new JSONObject(rawResponse.toString());
+            var filePath = String.valueOf(response.get("file_path"));
+            var fileUrl = new URL("https://api.telegram.org/file/bot" + telegramToken + "/" + filePath);
+            var in = new BufferedInputStream(fileUrl.openStream());
+            var out = new ByteArrayOutputStream();
+            var buf = new byte[1024];
+            var n = 0;
+            while (-1!=(n=in.read(buf))) {
+                out.write(buf, 0, n);
+            }
+            out.close();
+            in.close();
+            var r = out.toByteArray();
+            var filename = String.valueOf(response.get("file_unique_id")) + ".jpg"
+            var fos = new FileOutputStream(filename);
+            fos.write(r);
+            fos.close();
+            var minioClient = MinioClient.builder()
+                .endpoint("https://minio-api-minio.apps.cluster-lsc68.dynamic.redhatworkshops.io")
+                .credentials("minio", "minio123")
+                .build();
+            minioClient.uploadObject(UploadObjectArgs.builder()
+                .bucket("yoloimages")
+                .object("/upload/" + filename)
+                .filename(filename)
+                .build());
+        } catch (Exception e) {
+            System.out.println("Error on handlePhoto: " + e.getMessage());
+        }
     }
 
     private String callGemini(String firstName, String lastName, String text) {
