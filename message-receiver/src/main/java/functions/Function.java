@@ -25,7 +25,16 @@ import org.elasticsearch.client.RestClientBuilder.HttpClientConfigCallback;
 
 import nl.altindag.ssl.SSLFactory;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.lang.StringBuilder;
+import java.net.URL;
+import javax.net.ssl.HostnameVerifier;
 import java.util.List;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
 
 public class Function {
 
@@ -65,7 +74,7 @@ public class Function {
         var output = new Output(date, firstName, lastName, text, message);
         var index = "messages";
         if (text != null && text.startsWith("/itsm")) index = "tickets";
-        saveOutput(output, index);
+        if (text != null && !text.startsWith("/history")) saveOutput(output, index);
 
         // return
         return CloudEventBuilder.create().build(output);
@@ -87,7 +96,40 @@ public class Function {
             return "Ticket aberto com o histórico de mensagens: " + history;
         }
 
-        return "Não entendi sua pergunta, poderia repetir?";
+        return callGemini(firstName, lastName, text);
+    }
+
+    private String callGemini(String firstName, String lastName, String text) {
+            try {
+                var endpoint = "https://python-gemini-python-gemini.apps.cluster-lsc68.dynamic.redhatworkshops.io/ask_gemini";
+                var url = new URL(endpoint);
+                var connection = (HttpsURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Content-Type", "application/json");
+                connection.setHostnameVerifier(new HostnameVerifier() {
+                    @Override
+                    public boolean verify(String hostname, SSLSession session) {
+                        return true;
+                    }
+                });
+                connection.setDoOutput(true);
+                try (OutputStream os = connection.getOutputStream()) {
+                    var input = text.getBytes("utf-8");
+                    os.write(input, 0, input.length);           
+                }
+                var response = new StringBuilder();
+                try (var in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+                    var line = "";
+                    while((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
+                }
+                connection.disconnect();
+                return response.toString();
+            } catch(Exception e) {
+                System.out.println("Error on callGemini: " + e.getMessage());
+                return "Ocorreu um erro ao chamar API do Gemini :(";
+            }
     }
 
     private String getHistory(String firstName, String lastName) {
