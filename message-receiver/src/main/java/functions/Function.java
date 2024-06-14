@@ -74,6 +74,8 @@ public class Function {
         var firstName = from.getFirstName();
         var lastName = from.getLastName();
         var text = input.getText();
+        var chat = input.getChat();
+        var chatId = chat.getId();
         var photo = input.getPhoto();
 
         // create message
@@ -89,7 +91,7 @@ public class Function {
         if (text != null && !text.startsWith("/history")) saveOutput(output, index);
 
         if (photo != null && photo.size() > 0) {
-            handlePhoto(photo);
+            handlePhoto(chatId, photo);
         }
 
         // return
@@ -115,7 +117,7 @@ public class Function {
         return callGemini(firstName, lastName, text);
     }
 
-    private void handlePhoto(List<Input.Photo> photo) {
+    private void handlePhoto(Integer chatId, List<Input.Photo> photo) {
         try {
             var fileId = photo.get(0).getFileId();
             var endpoint = "https://api.telegram.org/bot" + telegramToken + "/getFile?file_id=" + fileId;
