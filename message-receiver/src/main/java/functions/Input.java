@@ -1,20 +1,23 @@
 package functions;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
 public class Input {
     private Integer date;
     private From from;
     private String text;
     private Chat chat;
+    private List<Photo> photo;
 
     public Input() {}
 
-    public Input(Integer date, From from, String text, Chat chat) {
+    public Input(Integer date, From from, String text, Chat chat, List<Photo> photo) {
         this.date = date;
         this.from = from;
         this.text = text;
         this.chat = chat;
+        this.photo = photo;
     }
 
     public Integer getDate() {
@@ -33,6 +36,10 @@ public class Input {
         return chat;
     }
 
+    public List<Photo> getPhoto() {
+        return photo;
+    }
+
     public void setDate(Integer date) {
         this.date = date;
     }
@@ -47,6 +54,10 @@ public class Input {
 
     public void setChat(Chat chat) {
         this.chat = chat;
+    }
+
+    public void setPhoto(List<Photo> photo) {
+        this.photo = photo;
     }
 
     public static class From {
@@ -121,6 +132,33 @@ public class Input {
         public String toString() {
             return "Chat{" +
                     "id='" + id + '\'' +
+                    "}";
+        }
+    }
+
+    public static class Photo {
+
+        @JsonProperty("file_id")
+        private String fileId;
+
+        public Photo() {}
+
+        public Photo(String fileId) {
+            this.fileId = fileId;
+        }
+
+        public String getFileId() {
+            return fileId;
+        }
+
+        public void setFileId(String fileId) {
+            this.fileId = fileId;
+        }
+
+        @Override
+        public String toString() {
+            return "Photo{" +
+                    "fileId='" + fileId + '\'' +
                     "}";
         }
     }

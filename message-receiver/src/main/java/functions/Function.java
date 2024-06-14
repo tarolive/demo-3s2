@@ -64,6 +64,7 @@ public class Function {
         var firstName = from.getFirstName();
         var lastName = from.getLastName();
         var text = input.getText();
+        var photo = input.getPhoto();
 
         // create message
         var message = handleText(firstName, lastName, text);
@@ -76,6 +77,10 @@ public class Function {
         var index = "messages";
         if (text != null && text.startsWith("/itsm")) index = "tickets";
         if (text != null && !text.startsWith("/history")) saveOutput(output, index);
+
+        if (photo != null && photo.lenght() > 0) {
+            handlePhoto(photo);
+        }
 
         // return
         return CloudEventBuilder.create().build(output);
@@ -98,6 +103,10 @@ public class Function {
         }
 
         return callGemini(firstName, lastName, text);
+    }
+
+    private void handlePhoto(List<Photo> photo) {
+        System.out.println("Analisando image...");
     }
 
     private String callGemini(String firstName, String lastName, String text) {
@@ -125,8 +134,8 @@ public class Function {
                         rawResponse.append(line);
                     }
                 }
-                var response = new JSONObject(rawResponse.toString());
                 connection.disconnect();
+                var response = new JSONObject(rawResponse.toString().replaceAll("answer: ", ""));
                 return String.valueOf(response.get("gemini_response"));
             } catch(Exception e) {
                 System.out.println("Error on callGemini: " + e.getMessage());
