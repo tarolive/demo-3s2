@@ -122,7 +122,7 @@ public class Function {
 
     private void handlePhoto(Integer chatId, List<Input.Photo> photo) {
         try {
-            var fileId = photo.get(0).getFileId();
+            var fileId = photo.get(photo.size() - 1).getFileId();
             var endpoint = "https://api.telegram.org/bot" + telegramToken + "/getFile?file_id=" + fileId;
             var url = new URL(endpoint);
             var connection = (HttpsURLConnection) url.openConnection();
