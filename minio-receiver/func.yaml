@@ -1,0 +1,5 @@
+specVersion: 0.36.0
+name: minio-receiver
+runtime: python
+created: 2024-06-28T17:30:27.640085221Z
+invoke: cloudevent
