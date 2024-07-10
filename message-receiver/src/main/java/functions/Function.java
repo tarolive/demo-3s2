@@ -64,6 +64,21 @@ public class Function {
     @ConfigProperty(name = "elasticsearch.password")
     String elasticsearchPassword;
 
+    @ConfigProperty(name = "gemini.url")
+    String geminiURL;
+
+    @ConfigProperty(name = "minio.url")
+    String minioURL;
+
+    @ConfigProperty(name = "minio.username")
+    String minioUsername;
+
+    @ConfigProperty(name = "minio.password")
+    String minioPassword;
+
+    @ConfigProperty(name = "yolo.url")
+    String yoloURL;
+
     @Funq
     public CloudEvent<Output> function(CloudEvent<Input> cloudEvent) {
 
@@ -160,8 +175,8 @@ public class Function {
             fos.write(r);
             fos.close();
             var minioClient = MinioClient.builder()
-                .endpoint("https://minio-api-minio.apps.cluster-lsc68.dynamic.redhatworkshops.io")
-                .credentials("minio", "minio123")
+                .endpoint(minioURL)
+                .credentials(minioUsername, minioPassword)
                 .build();
             minioClient.uploadObject(UploadObjectArgs.builder()
                 .bucket("yoloimages")
@@ -169,8 +184,7 @@ public class Function {
                 .filename(filename)
                 .build());
             new File(filename).delete();
-            endpoint = "https://python-python-yolo.apps.cluster-lsc68.dynamic.redhatworkshops.io/yolo_infer";
-            url = new URL(endpoint);
+            url = new URL(yoloURL);
             connection = (HttpsURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
@@ -209,8 +223,7 @@ public class Function {
 
     private String callGemini(String firstName, String lastName, String text) {
             try {
-                var endpoint = "https://python-gemini-python-gemini.apps.cluster-lsc68.dynamic.redhatworkshops.io/ask_gemini";
-                var url = new URL(endpoint);
+                var url = new URL(geminiURL);
                 var connection = (HttpsURLConnection) url.openConnection();
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Content-Type", "application/json");
